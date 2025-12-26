@@ -42,12 +42,12 @@
 </div>
 
 <script>
-    // 1. YOUR CREDENTIALS (Paste from Supabase Settings)
-    const SUPABASE_URL = 'https://apdsaisgviycynayhppl.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_o-0WblWD0aqXRiCakqRtNg_CuEqfmdS';
+  const { createClient } = supabase;
 
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const SUPABASE_URL = 'https://apdsaisgviycynayhppl.supabase.co';
+  const SUPABASE_KEY = ' sb_publishable_o-0WblWD0aqXRiCakqRtNg_CuEqfmdS';
 
+  const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
     // 2. FETCH DATA
     async function fetchTargets() {
         const { data, error } = await supabase.from('targets').select('*').order('created_at', { ascending: false });
